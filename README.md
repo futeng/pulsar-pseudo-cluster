@@ -3,11 +3,11 @@ Script to deploy pulsar in pseudo-cluster (simply as PPC).
 
 ## Test cross
 
-| HOST\Apache Pulsar   | 2.9.1          | 2.8.2 | 2.6.1 |
-| -------------------- | -------------- | ----- | ----- |
-| CentOS 7.5 + JDK1.8  | probably *[1]* |       |       |
-| CentOS 7.5 + JDK11   | √              |       |       |
-| MacMini M1 + JDK 1.8 | √              |       |       |
+| HOST\Apache Pulsar   | 2.9.1          | 2.8.2   | 2.7.4 | 2.6.1   |
+| -------------------- | -------------- | ------- | ----- | ------- |
+| CentOS 7.5 + JDK1.8  | probably *[1]* | √       |       | waiting |
+| CentOS 7.5 + JDK11   | √              | waiting |       | waiting |
+| MacMini M1 + JDK 1.8 | √              | waiting |       | waiting |
 
 - [1] Not recomend, sometimes get error: `Error occurred during initialization of VM. Could not create ConcurrentG1RefineThread`
 
