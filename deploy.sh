@@ -27,7 +27,7 @@ checkOS() {
 	unameOut="$(uname -s)"
 	case "${unameOut}" in
 	    Linux*)     machine=Linux; ${echo_with_date} "[1/9][√] Your OS is ready => GNU/Linux" ;;
-	    Darwin*)    machine=Mac; sed_i='${sed_i}'; ${echo_with_date} "[1/9][√] Your OS is ready => Mac OS" ;;
+	    Darwin*)    machine=Mac; sed_i='sed -i "" '; ${echo_with_date} "[1/9][√] Your OS is ready => Mac OS" ;;
 	    CYGWIN*)    machine=Cygwin; exit 1;;
 	    MINGW*)     machine=MinGw; exit 1;;
 	    *)          machine="UNKNOWN:${unameOut}"; exit 1
@@ -54,7 +54,7 @@ pulsar_tarball=""
 checkTarball() {
 	if ls apache-pulsar-*-bin.tar.gz >/dev/null 2>&1; then
 		pulsar_tarball=$(ls apache-pulsar-*-bin.tar.gz)
-		${echo_with_date} "[3/9][√] Your Pulsar tarball is ready => Your pulsar version is: "$pulsar_tarball
+		${echo_with_date} "[3/9][√] Your Pulsar tarball is ready => "$pulsar_tarball
 	else
 		${echo_with_date} "[x] tarball check => Please download and put the tarball under the same directory with this deploy script."
 		${echo_with_date} "tips: wget https://dlcdn.apache.org/pulsar/pulsar-2.9.1/apache-pulsar-2.9.1-bin.tar.gz --no-check-certificate"
