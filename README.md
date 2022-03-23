@@ -5,7 +5,7 @@ Script to deploy pulsar in pseudo-cluster (simply as PPC).
 
 | HOST\Apache Pulsar   | 2.9.1 | 2.8.2   | 2.7.4   | 2.6.1   |
 | -------------------- | ----- | ------- | ------- | ------- |
-| CentOS 7.5 + jdk 11  | √     | waiting | waiting | waiting |
+| CentOS 7.5 + jdk 11  | √     | √       | waiting | waiting |
 | CentOS 7.5 + jdk1.8  | [1]   | √       | waiting | waiting |
 | MacMini M1 + jdk 1.8 | √     | waiting | waiting | waiting |
 
