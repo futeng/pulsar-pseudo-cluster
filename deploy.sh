@@ -67,7 +67,7 @@ checkPortConflict() {
 	port_list="12181|22181|32181|19990|29990|39990|18001|18002|18003|18004|18005|18006|12888|13888|22888|23888|32888|33888|18443|28443|38443|16650|26650|36650|13181|23181|33181|18080|28080|38080|16651|26651|36651"
 	if [[ -n $(netstat -ant|grep -E "$port_list")  ]]; then
 		${echo_with_date} "[x] Ports Conflicts => Please ensure that the following ports are not occupied:"
-		echo "Tips: netstat -ant|grep -E $port_list"
+		echo "Tips: netstat -ant|grep -E \"$port_list\""
 		exit 1
 	else
 		${echo_with_date} "[4/9][√] Your Ports are ready => Port list: $port_list"
@@ -88,9 +88,9 @@ stopZK() {
 }
 
 startZK() {
-	pulsar-1/bin/pulsar-daemon start zookeeper
-	pulsar-2/bin/pulsar-daemon start zookeeper
-	pulsar-3/bin/pulsar-daemon start zookeeper
+    PULSAR_EXTRA_OPTS="-Dstats_server_port=18001" pulsar-1/bin/pulsar-daemon start zookeeper
+    PULSAR_EXTRA_OPTS="-Dstats_server_port=18002" pulsar-2/bin/pulsar-daemon start zookeeper
+    PULSAR_EXTRA_OPTS="-Dstats_server_port=18003" pulsar-3/bin/pulsar-daemon start zookeeper
 }
 
 testZK() {
