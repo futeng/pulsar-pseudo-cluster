@@ -355,17 +355,20 @@ crateTenantAndNamespace() {
 
 	${echo_with_date} "[ list brokers ] -> pulsar-1/bin/pulsar-admin brokers list pulsar_pseudo_cluster"
 	pulsar-1/bin/pulsar-admin brokers list pulsar_pseudo_cluster
-	${echo_with_date} "[ leader-broker ] -> pulsar-1/bin/pulsar-admin brokers leader-broker"
-	pulsar-1/bin/pulsar-admin brokers leader-broker
+	
+	# leader-broker command dose not exits before pulsar 2.8.0
+	#${echo_with_date} "[ leader-broker ] -> pulsar-1/bin/pulsar-admin brokers leader-broker"
+	#pulsar-1/bin/pulsar-admin brokers leader-broker
+	
 	${echo_with_date} "[ create local cluster ] -> pulsar-1/bin/pulsar-admin clusters create pulsar_pseudo_cluster --url http://127.0.0.1:18080/"	
-	pulsar-1/bin/pulsar-admin clusters create  pulsar_pseudo_cluster
+	pulsar-1/bin/pulsar-admin clusters create  pulsar_pseudo_cluster --url http://127.0.0.1:18080/
 	${echo_with_date} "[ create tenant ] -> pulsar-1/bin/pulsar-admin tenants create t1 -c pulsar_pseudo_cluster"	
 	pulsar-1/bin/pulsar-admin tenants create t1 -c pulsar_pseudo_cluster
 	${echo_with_date} "[ create tenant/namespaces ] -> pulsar-1/bin/pulsar-admin namespaces create t1/ns1 -c pulsar_pseudo_cluster"
 	pulsar-1/bin/pulsar-admin namespaces create t1/ns1 -c pulsar_pseudo_cluster
 
 	${echo_with_date} "[ create second cluster ] -> pulsar-1/bin/pulsar-admin clusters create cluster_2 --url http://127.0.0.1:18080/"
-	pulsar-1/bin/pulsar-admin clusters create cluster_2
+	pulsar-1/bin/pulsar-admin clusters create cluster_2 --url http://127.0.0.1:18080/
 	${echo_with_date} "[ create second tenant ] -> pulsar-1/bin/pulsar-admin tenants create t2 -c cluster_2"
 	pulsar-1/bin/pulsar-admin tenants create t2 -c cluster_2
 	${echo_with_date} "[ create second tenant/namespaces ] -> pulsar-1/bin/pulsar-admin namespaces create t2/ns2 -c cluster_2"
