@@ -408,6 +408,8 @@ unzipPulsar
 initDataDir
 
 # 2. Deploy pseudo-cluster of Zookeeper
+# - Configure log4j2 for flush log immediatelly
+replaceLog4j2
 # - Configure Zookeeper 
 replaceZookeeperConf
 # - Start Zookeeper pseudo-cluster
@@ -420,8 +422,6 @@ initPulsarMetadata
 getPulsarMetaDate
 
 # 4. Deploy pseudo-cluster of BookKeeper(bookies)
-# - Configure log4j2 for flush log immediatelly
-replaceLog4j2
 # - Configure bookkeeper.conf
 replaceBookKeeperConf
 # - Start Bookis
