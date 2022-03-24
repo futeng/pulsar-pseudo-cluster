@@ -1,5 +1,5 @@
 # pulsar-pseudo-cluster
-One script to (re)deploy pulsar in pseudo-cluster (simply as PPC).
+One script to (re)deploy Pulsar in pseudo-cluster mode.
 
 - Introduction video: https://www.bilibili.com/video/BV1rU4y1d7c7
 
@@ -17,14 +17,11 @@ One script to (re)deploy pulsar in pseudo-cluster (simply as PPC).
 
 ## Test cross
 
-| HOST \ Apache Pulsar      | 2.9.1 | 2.8.2 | 2.7.4   | 2.6.1 |
-| ------------------------- | ----- | ----- | ------- | ----- |
-| CentOS 7.5 + jdk 11       | √     | √     | √ ②     | √     |
-| CentOS 7.5 + jdk1.8       | √ ①   | √     | waiting | √     |
-| MacOS 12.2.1 M1 + jdk 1.8 | √     | √     | √ ②     | √     |
-
-- ①：Not recomend. Sometimes get error: `Error occurred during initialization of VM. Could not create ConcurrentG1RefineThread`
-- ②：Not recomend. Cluster is OK, some problem of ompatibility for using `cluster-admin`
+| HOST \ Apache Pulsar      | 2.9.1 | 2.8.2 | 2.7.4 | 2.6.1 |
+| ------------------------- | ----- | ----- | ----- | ----- |
+| CentOS 7.5 + jdk 11       | √     | √     | √     | √     |
+| CentOS 7.5 + jdk1.8       | √     | √     | √     | √     |
+| MacOS 12.2.1 M1 + jdk 1.8 | √     | √     | √     | √     |
 
 ## How to use
 
@@ -40,6 +37,8 @@ $ wget https://dlcdn.apache.org/pulsar/pulsar-2.9.1/apache-pulsar-2.9.1-bin.tar.
 # Just execute the deployment script
 $ sh deploy.sh
 ```
+
+Tips: It's recommend to stop all threads ( `./stop-all.sh` ) before you redeploy (double check).
 
  ## Full log example
 
@@ -102,7 +101,8 @@ Note: Set immediateFlush to true in conf/log4j2.yaml will guarantee the logging 
 [2022-03-24 11:34:27] [ get tenant's clusters ] -> pulsar-1/bin/pulsar-admin namespaces get-clusters t1/ns1
 "pulsar_pseudo_cluster"
 [2022-03-24 11:34:27] [pulsar-client produce][√] 10 messages successfully produced
-[2022-03-24 11:34:27] [pulsar-client consume][√] 10 messages successfully consumed
+[2022-03-24 11:34:27] [pulsar-client consume] Now it's your turn to test. Please execute consume command like:
+pulsar-1/bin/pulsar-client consume persistent://t1/ns1/test -n 10 -s "consumer-test"  -t "Exclusive" -p "Earliest"
  _   _  _     ______        _                    _
 | | | |(_)    | ___ \      | |                  | |
 | |_| | _     | |_/ /_   _ | | ___   __ _  _ __ | |
