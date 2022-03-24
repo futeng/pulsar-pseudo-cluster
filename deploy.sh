@@ -229,15 +229,15 @@ replaceZookeeperConf() {
 	${sed_i} "s|metricsProvider.httpPort=8000|metricsProvider.httpPort=18002|" pulsar-2/conf/zookeeper.conf
 	${sed_i} "s|metricsProvider.httpPort=8000|metricsProvider.httpPort=18003|" pulsar-3/conf/zookeeper.conf
 
-	echo "server.1=localhost:12888:13888" >> pulsar-1/conf/zookeeper.conf
-	echo "server.2=localhost:22888:23888" >> pulsar-1/conf/zookeeper.conf
-	echo "server.3=localhost:32888:33888" >> pulsar-1/conf/zookeeper.conf
-	echo "server.1=localhost:12888:13888" >> pulsar-2/conf/zookeeper.conf
-	echo "server.2=localhost:22888:23888" >> pulsar-2/conf/zookeeper.conf
-	echo "server.3=localhost:32888:33888" >> pulsar-2/conf/zookeeper.conf
-	echo "server.1=localhost:12888:13888" >> pulsar-3/conf/zookeeper.conf
-	echo "server.2=localhost:22888:23888" >> pulsar-3/conf/zookeeper.conf
-	echo "server.3=localhost:32888:33888" >> pulsar-3/conf/zookeeper.conf
+	echo "server.1=127.0.0.1:12888:13888" >> pulsar-1/conf/zookeeper.conf
+	echo "server.2=127.0.0.1:22888:23888" >> pulsar-1/conf/zookeeper.conf
+	echo "server.3=127.0.0.1:32888:33888" >> pulsar-1/conf/zookeeper.conf
+	echo "server.1=127.0.0.1:12888:13888" >> pulsar-2/conf/zookeeper.conf
+	echo "server.2=127.0.0.1:22888:23888" >> pulsar-2/conf/zookeeper.conf
+	echo "server.3=127.0.0.1:32888:33888" >> pulsar-2/conf/zookeeper.conf
+	echo "server.1=127.0.0.1:12888:13888" >> pulsar-3/conf/zookeeper.conf
+	echo "server.2=127.0.0.1:22888:23888" >> pulsar-3/conf/zookeeper.conf
+	echo "server.3=127.0.0.1:32888:33888" >> pulsar-3/conf/zookeeper.conf
 
 }
 
