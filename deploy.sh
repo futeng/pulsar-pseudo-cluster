@@ -157,15 +157,10 @@ testBrokers() {
 		exit 1
 	fi		
 
-	pulsar-1/bin/pulsar-client consume persistent://t1/ns1/test -n 10 -s "consumer-test"  -t "Exclusive" -p Earliest > ./consume.log 2>&1
+	# Comsume test
+	${echo_with_date} "[pulsar-client consume] Now it's your turn to test. Please execute consume command like:"
+	echo "pulsar-1/bin/pulsar-client consume persistent://t1/ns1/test -n 10 -s \"consumer-test\"  -t \"Exclusive\" -p \"Earliest\""
 
-  	if [[ -f ./consume.log && $(grep -c "10 messages successfully consumed" ./consume.log) -ne 0 ]]; then
-		${echo_with_date} "[pulsar-client consume][√] 10 messages successfully consumed"
-		rm ./consume.log
-	else
-		${echo_with_date} "[pulsar-client consume][x] Something wrong when using pulsar-client consume message."
-		exit 1
-	fi	
 }
 
 # You may need kill threads manually if it's some err happens.
