@@ -278,9 +278,9 @@ replaceBrokerConf() {
 	${sed_i} 's/zookeeperServers=/zookeeperServers=127.0.0.1:12181,127.0.0.1:22181,127.0.0.1:32181/' pulsar-3/conf/broker.conf
 	
 	# configurationStoreServers=
-	${sed_i} 's|configurationStoreServers=|configurationStoreServers=127.0.0.1:12181,127.0.0.1:22181,127.0.0.1:32181/pulsar-configuration-store|' pulsar-1/conf/broker.conf
-	${sed_i} 's|configurationStoreServers=|configurationStoreServers=127.0.0.1:12181,127.0.0.1:22181,127.0.0.1:32181/pulsar-configuration-store|' pulsar-2/conf/broker.conf
-	${sed_i} 's|configurationStoreServers=|configurationStoreServers=127.0.0.1:12181,127.0.0.1:22181,127.0.0.1:32181/pulsar-configuration-store|' pulsar-3/conf/broker.conf
+	${sed_i} 's|configurationStoreServers=|configurationStoreServers=127.0.0.1:12181,127.0.0.1:22181,127.0.0.1:32181|' pulsar-1/conf/broker.conf
+	${sed_i} 's|configurationStoreServers=|configurationStoreServers=127.0.0.1:12181,127.0.0.1:22181,127.0.0.1:32181|' pulsar-2/conf/broker.conf
+	${sed_i} 's|configurationStoreServers=|configurationStoreServers=127.0.0.1:12181,127.0.0.1:22181,127.0.0.1:32181|' pulsar-3/conf/broker.conf
 	
 	# brokerServicePort=6650
 	${sed_i} 's|brokerServicePort=6650|brokerServicePort=16650|' pulsar-1/conf/broker.conf
