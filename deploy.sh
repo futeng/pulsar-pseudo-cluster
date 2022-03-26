@@ -39,10 +39,10 @@ checkJDK() {
 	jdk_version=$(java -version 2>&1 | sed '1!d' | sed -e 's/"//g' | awk '{print $3}')
 
 	if [ "$jdk_version" = "not" ]; then
-		${echo_with_date} "[x] JDK test failed => Please install JDK and configure JAVA_HOME first.)"
+		${echo_with_date} "[2/9][x] JDK test failed => Please install JDK and configure JAVA_HOME first.)"
 		exit 1
 	else
-		${echo_with_date} "[2/9][√] Your JDK is ready => $jdk_version. Please check the version conflicts with Pulsar manually(JDK11+ is recommend)."
+		${echo_with_date} "[2/9][√] JDK is ready => $jdk_version. Please check the version conflicts with Pulsar manually(JDK11+ is recommend)."
 	fi
 }
 
@@ -54,9 +54,9 @@ pulsar_tarball=""
 checkTarball() {
 	if ls apache-pulsar-*-bin.tar.gz >/dev/null 2>&1; then
 		pulsar_tarball=$(ls apache-pulsar-*-bin.tar.gz)
-		${echo_with_date} "[3/9][√] Your Pulsar tarball is ready => "$pulsar_tarball
+		${echo_with_date} "[3/9][√] Pulsar tarball is ready => "$pulsar_tarball
 	else
-		${echo_with_date} "[x] tarball check => Please download and put the tarball under the same directory with this deploy script."
+		${echo_with_date} "[3/9][x] tarball check => Please download and put the tarball under the same directory with this deploy script."
 		${echo_with_date} "tips: wget https://dlcdn.apache.org/pulsar/pulsar-2.9.1/apache-pulsar-2.9.1-bin.tar.gz --no-check-certificate"
 		exit 1
 	fi
@@ -66,7 +66,7 @@ checkTarball() {
 checkPortConflict() {
 	port_list="12181|22181|32181|19990|29990|39990|18001|18002|18003|18004|18005|18006|12888|13888|22888|23888|32888|33888|18443|28443|38443|16650|26650|36650|13181|23181|33181|18080|28080|38080|16651|26651|36651"
 	if [[ -n $(netstat -ant|grep -E "$port_list")  ]]; then
-		${echo_with_date} "[x] Ports Conflicts => Please ensure that the following ports are not occupied:"
+		${echo_with_date} "[4/9][x] Ports Conflicts => Please ensure that the following ports are not occupied:"
 		echo "Tips: netstat -ant|grep -E \"$port_list\""
 		exit 1
 	else
@@ -104,7 +104,7 @@ testZK() {
 		rm ./zktest
 		pulsar-1/bin/pulsar zookeeper-shell -server $zk_server delete /testzk >/dev/null 2>&1
 	else
-		${echo_with_date} "[x] Your Zookeeper Pseudo cluster test failed. Please check it manually."
+		${echo_with_date} "[6/9][x] Your Zookeeper Pseudo cluster test failed. Please check it manually."
 		exit 1
 	fi
 }
@@ -129,7 +129,7 @@ testBookies() {
 		rm ./10_entries_written.log
 
 	else
-		${echo_with_date} "[x] Bookies simpletest failed. Please check it manually."
+		${echo_with_date} "[9/9][x] Bookies simpletest failed. Please check it manually."
 		exit 1
 	fi	
 }
@@ -330,17 +330,17 @@ initPulsarMetadata() {
 		rm ./initialize-cluster-metadata.log
 
 	else
-		${echo_with_date} "[x] Initialize pulsar metadata in Zookeeper failed. Please check it manually."
+		${echo_with_date} "[7/9][x] Initialize pulsar metadata in Zookeeper failed. Please check it manually."
 		exit 1
 	fi
 }
 
 getPulsarMetaDate() {
 	metadata_info=$(pulsar-1/bin/pulsar zookeeper-shell -server 127.0.0.1:12181 get  /admin/clusters/pulsar_pseudo_cluster | grep serviceUrl)
-	if [[ $metadata_info =~ "http://127.0.0.1:12181:18080"  ]]; then
+	if [[ $metadata_info =~ "http://127.0.0.1:18080"  ]]; then
 		${echo_with_date} "[8/9][√] Your cluster metadata test is ready. => "$metadata_info
 	else 
-		${echo_with_date} "[x] Something wrong when initialize your cluster metadata, please check Zookeeper manually, then re-execute this script."
+		${echo_with_date} "[8/9][x] Something wrong when initialize your cluster metadata, please check Zookeeper manually, then re-execute this script."
 	fi
 }
 
