@@ -320,10 +320,10 @@ initPulsarMetadata() {
   		--cluster pulsar_pseudo_cluster \
   		--zookeeper 127.0.0.1:12181 \
   		--configuration-store 127.0.0.1:12181 \
-  		--web-service-url http://127.0.0.1:12181:18080 \
-  		--web-service-url-tls https://127.0.0.1:12181:18443 \
-  		--broker-service-url pulsar://127.0.0.1:12181:16650 \
-  		--broker-service-url-tls pulsar+ssl://127.0.0.1:12181:16651 > ./initialize-cluster-metadata.log 2>&1
+  		--web-service-url http://127.0.0.1:18080 \
+  		--web-service-url-tls https://127.0.0.1:18443 \
+  		--broker-service-url pulsar://127.0.0.1:16650 \
+  		--broker-service-url-tls pulsar+ssl://127.0.0.1:16651 > ./initialize-cluster-metadata.log 2>&1
 
   	if [[ -f ./initialize-cluster-metadata.log && $(grep -c "Successfully" ./initialize-cluster-metadata.log) -ne 0 ]]; then
 		${echo_with_date} "[7/9][√] Your cluster metadata initialized in Zookeeper is ready."
