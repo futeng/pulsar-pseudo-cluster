@@ -165,16 +165,16 @@ testBrokers() {
 
 # You may need kill threads manually if it's some err happens.
 stopAll() {
-	if [[ $(ps -ef |grep "pulsar-" | grep -v "grep" |  grep QuorumPeerMain | wc -l) -gt 1 ]]; then
-		stopZK
+	if [[ $(ps -ef |grep "pulsar-" | grep -v "grep" |  grep broker.conf | wc -l) -gt 1 ]]; then
+		stopBrokers
 	fi
 
 	if [[ $(ps -ef |grep "pulsar-" | grep -v "grep" |  grep bookkeeper.conf | wc -l) -gt 1 ]]; then
 		stopBookies
 	fi
 
-	if [[ $(ps -ef |grep "pulsar-" | grep -v "grep" |  grep broker.conf | wc -l) -gt 1 ]]; then
-		stopBrokers
+	if [[ $(ps -ef |grep "pulsar-" | grep -v "grep" |  grep QuorumPeerMain | wc -l) -gt 1 ]]; then
+		stopZK
 	fi
 }
 
@@ -253,6 +253,11 @@ replaceBookKeeperConf() {
 	${sed_i} 's/advertisedAddress=/advertisedAddress=127.0.0.1/' pulsar-1/conf/bookkeeper.conf
 	${sed_i} 's/advertisedAddress=/advertisedAddress=127.0.0.1/' pulsar-2/conf/bookkeeper.conf
 	${sed_i} 's/advertisedAddress=/advertisedAddress=127.0.0.1/' pulsar-3/conf/bookkeeper.conf
+
+	# autoRecoveryDaemonEnabled=true
+  	${sed_i} 's/autoRecoveryDaemonEnabled=true/autoRecoveryDaemonEnabled=false/' pulsar-1/conf/bookkeeper.conf
+  	${sed_i} 's/autoRecoveryDaemonEnabled=true/autoRecoveryDaemonEnabled=false/' pulsar-2/conf/bookkeeper.conf
+  	${sed_i} 's/autoRecoveryDaemonEnabled=true/autoRecoveryDaemonEnabled=false/' pulsar-3/conf/bookkeeper.conf
 }
 
 replaceClientConf() {
