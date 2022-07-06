@@ -244,7 +244,14 @@ replaceBookKeeperConf() {
 	${sed_i} 's/prometheusStatsHttpPort=8000/prometheusStatsHttpPort=18004/' pulsar-1/conf/bookkeeper.conf
 	${sed_i} 's/prometheusStatsHttpPort=8000/prometheusStatsHttpPort=18005/' pulsar-2/conf/bookkeeper.conf
 	${sed_i} 's/prometheusStatsHttpPort=8000/prometheusStatsHttpPort=18006/' pulsar-3/conf/bookkeeper.conf
+
+
+	# Effective after 2.11.x
+	${sed_i} 's/metadataServiceUri=/metadataServiceUri=metadata-store:zk:127.0.0.1:12181,127.0.0.1:22181,127.0.0.1:32181/' pulsar-1/conf/bookkeeper.conf
+	${sed_i} 's/metadataServiceUri=/metadataServiceUri=metadata-store:zk:127.0.0.1:12181,127.0.0.1:22181,127.0.0.1:32181/' pulsar-2/conf/bookkeeper.conf
+	${sed_i} 's/metadataServiceUri=/metadataServiceUri=metadata-store:zk:127.0.0.1:12181,127.0.0.1:22181,127.0.0.1:32181/' pulsar-3/conf/bookkeeper.conf
 	
+	# Deprecated after 2.11.x
 	${sed_i} 's/zkServers=localhost:2181/zkServers=127.0.0.1:12181,127.0.0.1:22181,127.0.0.1:32181/' pulsar-1/conf/bookkeeper.conf
 	${sed_i} 's/zkServers=localhost:2181/zkServers=127.0.0.1:12181,127.0.0.1:22181,127.0.0.1:32181/' pulsar-2/conf/bookkeeper.conf
 	${sed_i} 's/zkServers=localhost:2181/zkServers=127.0.0.1:12181,127.0.0.1:22181,127.0.0.1:32181/' pulsar-3/conf/bookkeeper.conf
@@ -277,11 +284,25 @@ replaceClientConf() {
 
 replaceBrokerConf() {
 
+	# after 2.11.x
+	${sed_i} 's/metadataStoreUrl=/metadataStoreUrl=127.0.0.1:12181,127.0.0.1:22181,127.0.0.1:32181/' pulsar-1/conf/broker.conf
+	${sed_i} 's/metadataStoreUrl=/metadataStoreUrl=127.0.0.1:12181,127.0.0.1:22181,127.0.0.1:32181/' pulsar-2/conf/broker.conf
+	${sed_i} 's/metadataStoreUrl=/metadataStoreUrl=127.0.0.1:12181,127.0.0.1:22181,127.0.0.1:32181/' pulsar-3/conf/broker.conf
+	
+	# after 2.11.x
+	# configurationStoreServers=
+	${sed_i} 's|configurationMetadataStoreUrl=|configurationMetadataStoreUrl=127.0.0.1:12181,127.0.0.1:22181,127.0.0.1:32181|' pulsar-1/conf/broker.conf
+	${sed_i} 's|configurationMetadataStoreUrl=|configurationMetadataStoreUrl=127.0.0.1:12181,127.0.0.1:22181,127.0.0.1:32181|' pulsar-2/conf/broker.conf
+	${sed_i} 's|configurationMetadataStoreUrl=|configurationMetadataStoreUrl=127.0.0.1:12181,127.0.0.1:22181,127.0.0.1:32181|' pulsar-3/conf/broker.conf
+
+
+	# before 2.11.x
 	# zookeeperServers=
 	${sed_i} 's/zookeeperServers=/zookeeperServers=127.0.0.1:12181,127.0.0.1:22181,127.0.0.1:32181/' pulsar-1/conf/broker.conf
 	${sed_i} 's/zookeeperServers=/zookeeperServers=127.0.0.1:12181,127.0.0.1:22181,127.0.0.1:32181/' pulsar-2/conf/broker.conf
 	${sed_i} 's/zookeeperServers=/zookeeperServers=127.0.0.1:12181,127.0.0.1:22181,127.0.0.1:32181/' pulsar-3/conf/broker.conf
 	
+	# before 2.11.x
 	# configurationStoreServers=
 	${sed_i} 's|configurationStoreServers=|configurationStoreServers=127.0.0.1:12181,127.0.0.1:22181,127.0.0.1:32181|' pulsar-1/conf/broker.conf
 	${sed_i} 's|configurationStoreServers=|configurationStoreServers=127.0.0.1:12181,127.0.0.1:22181,127.0.0.1:32181|' pulsar-2/conf/broker.conf
@@ -313,6 +334,7 @@ replaceBrokerConf() {
 	${sed_i} 's|clusterName=|clusterName=pulsar_pseudo_cluster|' pulsar-3/conf/broker.conf
 	
 	# advertisedAddress
+	# Please DO NOT set advertisedAddress=127.0.0.1 in your prod env.
 	${sed_i} 's|advertisedAddress=|advertisedAddress=127.0.0.1|' pulsar-1/conf/broker.conf
 	${sed_i} 's|advertisedAddress=|advertisedAddress=127.0.0.1|' pulsar-2/conf/broker.conf
 	${sed_i} 's|advertisedAddress=|advertisedAddress=127.0.0.1|' pulsar-3/conf/broker.conf

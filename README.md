@@ -17,11 +17,14 @@ One script to (re)deploy Pulsar in pseudo-cluster mode.
 
 ## Test cross
 
-| HOST \ Apache Pulsar      | 2.9.1 | 2.8.2 | 2.7.4 | 2.6.1 |
-| ------------------------- | ----- | ----- | ----- | ----- |
-| CentOS 7.5 + jdk 11       | √     | √     | √     | √     |
-| CentOS 7.5 + jdk1.8       | √     | √     | √     | √     |
-| MacOS 12.2.1 M1 + jdk 1.8 | √     | √     | √     | √     |
+| HOST \ Apache Pulsar                                    | 2.11.0-SNAPSHOT | 2.10.0 | 2.9.1 | 2.8.2 | 2.7.4 | 2.6.1 |
+| ------------------------------------------------------- | --------------- | ------ | ----- | ----- | ----- | ----- |
+| CentOS 7.5 + jdk 11                                     | NTY             | √      | √     | √     | √     | √     |
+| CentOS 7.5 + jdk1.8                                     | NTY             | √      | √     | √     | √     | √     |
+| MacOS 12.2.1 M1 + jdk 1.8                               | NTY             | √      | √     | √     | √     | √     |
+| Apple M1 Pro macOS 12.4 <br />+ JDK Corretto-17.0.3.6.1 | √               | NTY    | NTY   | NTY   | NTY   | NTY   |
+
+- NTY: Not tested yet
 
 ## How to use
 
