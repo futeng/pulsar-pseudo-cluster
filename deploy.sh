@@ -137,13 +137,13 @@ testBookies() {
 startBrokers() {
 	pulsar-1/bin/pulsar-daemon start broker
 	pulsar-2/bin/pulsar-daemon start broker
-	pulsar-3/bin/pulsar-daemon start broker
+	# pulsar-3/bin/pulsar-daemon start broker
 }
 
 stopBrokers() {
 	pulsar-1/bin/pulsar-daemon stop broker
 	pulsar-2/bin/pulsar-daemon stop broker
-	pulsar-3/bin/pulsar-daemon stop broker
+	# pulsar-3/bin/pulsar-daemon stop broker
 }
 
 testBrokers() {
@@ -339,6 +339,23 @@ replaceBrokerConf() {
 	${sed_i} 's|advertisedAddress=|advertisedAddress=127.0.0.1|' pulsar-2/conf/broker.conf
 	${sed_i} 's|advertisedAddress=|advertisedAddress=127.0.0.1|' pulsar-3/conf/broker.conf
 
+	# Disalbe auto delete inactive topic
+	${sed_i} 's|brokerDeleteInactiveTopicsEnabled=false|brokerDeleteInactiveTopicsEnabled=true|' pulsar-1/conf/broker.conf
+	${sed_i} 's|brokerDeleteInactiveTopicsEnabled=false|brokerDeleteInactiveTopicsEnabled=true|' pulsar-2/conf/broker.conf
+	${sed_i} 's|brokerDeleteInactiveTopicsEnabled=false|brokerDeleteInactiveTopicsEnabled=true|' pulsar-3/conf/broker.conf
+
+}
+
+replaceJVMParametes() {
+	${sed_i} 's|2g|128m|' pulsar-1/conf/pulsar_env.sh
+	${sed_i} 's|2g|128m|' pulsar-2/conf/pulsar_env.sh
+	${sed_i} 's|2g|128m|' pulsar-3/conf/pulsar_env.sh
+	${sed_i} 's|4g|256m|' pulsar-1/conf/pulsar_env.sh
+	${sed_i} 's|4g|256m|' pulsar-2/conf/pulsar_env.sh
+	${sed_i} 's|4g|256m|' pulsar-3/conf/pulsar_env.sh
+	${sed_i} 's|2g|128m|' pulsar-1/conf/bkenv.sh
+	${sed_i} 's|2g|128m|' pulsar-2/conf/bkenv.sh
+	${sed_i} 's|2g|128m|' pulsar-3/conf/bkenv.sh
 }
 
 # Command for init pulsar metadata
@@ -436,6 +453,8 @@ initDataDir
 replaceLog4j2
 # - Configure Zookeeper 
 replaceZookeeperConf
+# - Configure JVM Parametes
+replaceJVMParametes
 # - Start Zookeeper pseudo-cluster
 startZK
 # - Test Zookeeper

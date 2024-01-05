@@ -1,6 +1,9 @@
 # Compiled class file
 *.class
 
+# Mac DS_Store file
+.DS_Store
+
 # Log file
 *.log
 
@@ -21,3 +24,9 @@
 
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
+
+# pulsar dir
+pulsar-1
+pulsar-2
+pulsar-3
+
