@@ -436,54 +436,54 @@ ${echo_with_date} "====> Start to (re)deploy the pseudo-cluster of pulsar <===="
 # - Remove Pulsar directorie if exists.
 checkOS
 checkJDK
-checkTarball
-stopAll
-checkPortConflict
-checkDisk
-removeAllPulsarDir
+# checkTarball
+# stopAll
+# checkPortConflict
+# checkDisk
+# removeAllPulsarDir
 
-# 1. Generate data directory
-# - Uncompress tarball and generate three directories.
-unzipPulsar
-# - Generate Zookeeper data dir
-initDataDir
+# # 1. Generate data directory
+# # - Uncompress tarball and generate three directories.
+# unzipPulsar
+# # - Generate Zookeeper data dir
+# initDataDir
 
-# 2. Deploy pseudo-cluster of Zookeeper
-# - Configure log4j2 for flush log immediatelly
-replaceLog4j2
-# - Configure Zookeeper 
-replaceZookeeperConf
-# - Configure JVM Parametes
-replaceJVMParametes
-# - Start Zookeeper pseudo-cluster
-startZK
-# - Test Zookeeper
-testZK
+# # 2. Deploy pseudo-cluster of Zookeeper
+# # - Configure log4j2 for flush log immediatelly
+# replaceLog4j2
+# # - Configure Zookeeper 
+# replaceZookeeperConf
+# # - Configure JVM Parametes
+# replaceJVMParametes
+# # - Start Zookeeper pseudo-cluster
+# startZK
+# # - Test Zookeeper
+# testZK
 
-# 3. Cluster metadata initialization
-initPulsarMetadata
-getPulsarMetaDate
+# # 3. Cluster metadata initialization
+# initPulsarMetadata
+# getPulsarMetaDate
 
-# 4. Deploy pseudo-cluster of BookKeeper(bookies)
-# - Configure bookkeeper.conf
-replaceBookKeeperConf
-# - Start Bookis
-startBookies
-# - Test Bookies
-testBookies
+# # 4. Deploy pseudo-cluster of BookKeeper(bookies)
+# # - Configure bookkeeper.conf
+# replaceBookKeeperConf
+# # - Start Bookis
+# startBookies
+# # - Test Bookies
+# testBookies
 
 
-# 5. Deploy brokers
-# - Configure broker.conf
-replaceBrokerConf
-# - Start broker
-startBrokers
-# - Configure client.conf
-replaceClientConf
+# # 5. Deploy brokers
+# # - Configure broker.conf
+# replaceBrokerConf
+# # - Start broker
+# startBrokers
+# # - Configure client.conf
+# replaceClientConf
 
-# 6. Pub-sub test
-# - Create local cluster and tenants/namespace）
-crateTenantAndNamespace
-# - Test broker(pub-sub)
-testBrokers
-printHello
+# # 6. Pub-sub test
+# # - Create local cluster and tenants/namespace）
+# crateTenantAndNamespace
+# # - Test broker(pub-sub)
+# testBrokers
+# printHello
