@@ -17,6 +17,11 @@ echo "          |/                                       ";
 echo "                                                   ";
 }
 
+
+start_time=$(date +%s)  # 记录开始时间
+
+
+
 # 变量，用户可在 cell 中自定义调整
 pulsar_cluster_name=pulsar_cluster_1
 zk_dir="$pulsar_cluster_name/zk"
@@ -51,11 +56,24 @@ ZK_SERVER="127.0.0.1:$zk_server_port"
 
 # 将端口聚合到一个数组中
 declare -a ports=(
-    $zk_server_port        
-    $zk_stats_server_port  
+    $zk_server_port
+    $zk_stats_server_port
     $zk_admin_serverPort
     $zk_metricsProvider_httpPort
-    # 在这里引用更多定义的端口变量
+    $br_1_web_service_url
+    $br_1_web_service_url_tls
+    $br_1_broker_service_url
+    $br_1_broker_service_url_tls
+    $br_2_web_service_url
+    $br_2_web_service_url_tls
+    $br_2_broker_service_url
+    $br_2_broker_service_url_tls
+    $bk_1_bookiePort
+    $bk_1_prometheusStatsHttpPort
+    $bk_2_bookiePort
+    $bk_2_prometheusStatsHttpPort
+    $bk_3_bookiePort
+    $bk_3_prometheusStatsHttpPort
 )
 
 
@@ -73,8 +91,13 @@ if [ -f "user-config.conf" ]; then
     source user-config.conf
 fi
 
-# 使用配置
-echo "Using Zookeeper server at: $zk_server"
+
+printTimes() {
+    local end_time=$(date +%s)  # 记录结束时间
+    local elapsed_time=$(( end_time - start_time ))  # 计算耗时
+    echo_info "Congratulations! Pulsar environment initialized and configurations optimized."
+    echo_info "Total time elapsed: $elapsed_time seconds."
+}
 
 # 检测操作系统，当前只适配了 Linux 和 macOS
 checkOS() {
@@ -82,12 +105,12 @@ checkOS() {
     case "${unameOut}" in
         Linux*)
             machine="Linux"
-            echo_info "[√] Your OS is ready => GNU/Linux"
+            echo_info "[√] Your operating system is supported => GNU/Linux"
             ;;
         Darwin*)
             machine="Mac"
             sed_i="sed -i ''"
-            echo_info "[√] Your OS is ready => macOS"
+            echo_info "[√] Your operating system is supported => macOS"
             ;;
         CYGWIN*|MINGW*)
             echo_error "Your OS is not supported => ${unameOut}"
@@ -108,7 +131,7 @@ checkJDK() {
         echo_error "JAVA_HOME is not set."
         exit 1
     else
-        echo_info "JAVA_HOME is set to $JAVA_HOME"
+        echo_info "[√] JAVA_HOME is found in $JAVA_HOME"
     fi
 
     # 检查 JAVA_HOME 目录下是否存在 java 可执行文件
@@ -119,30 +142,25 @@ checkJDK() {
 
     # 获取 Java 版本
     java_version=$("$JAVA_HOME/bin/java" -version 2>&1 | awk -F '"' '/version/ {print $2}')
-    echo_info "Detected Java version: $java_version"
     
     # 比较版本是否大于等于 17
     if [[ "$java_version" < "17" ]]; then
         echo_error "Java version is less than 17. Detected version: $java_version"
         exit 1
     else
-        echo_info "[√] Java version is 17 or greater."
+        echo_info "[√] Detected Java version: $java_version is 17 or greater."
     fi
 }
 
 
 
 checkPortConflicts() {
-    # 检测端口冲突
-    echo_info "Checking for port conflicts..."
 
     # 检查每个端口
     for port in "${ports[@]}"; do
         if lsof -i:$port &> /dev/null; then
             echo_error "Port $port is already in use."
             exit 1
-        else
-            echo_info "Port $port is available."
         fi
     done
 
@@ -191,53 +209,10 @@ initializeDirectories() {
     mkdir -p "$pulsar_cluster_name"/zk/data
     echo "1" > "$pulsar_cluster_name"/zk/data/myid
 
-    echo_info "Directory structure initialized under '$pulsar_cluster_name'."
-}
-shutdownPulsarServicesV1() {
-    local services=("bookie1" "bookie2" "bookie3" "broker1" "broker2" "zk")
-    local service_dir=""
-    local service_type=""
-    local pid=""
-
-    for service in "${services[@]}"; do
-        service_dir="$pulsar_cluster_name/$service"
-
-        # 确定服务类型
-        if [[ "$service" == *"broker"* ]]; then
-            service_type="broker"
-        elif [[ "$service" == *"bookie"* ]]; then
-            service_type="bookie"
-        elif [[ "$service" == *"zk"* || "$service" == *"Zookeeper"* ]]; then
-            service_type="zookeeper"
-        fi
-
-        # 使用 pulsar-daemon 停止服务
-        if [ -d "$service_dir" ]; then
-            echo_info "Stopping $service_type service in $service using pulsar-daemon."
-            "$service_dir/bin/pulsar-daemon" stop "$service_type"
-
-            # 检查 JVM 进程是否还在运行
-            sleep 5  # 给予一些时间让进程优雅退出
-            pid=$(pgrep -f "$service_dir" | grep java)
-
-            if [ ! -z "$pid" ]; then
-                echo_warn "Service $service_type in $service is still running, PID: $pid, attempting kill."
-                kill -9 "$pid"
-                if [ $? -eq 0 ]; then
-                    echo_info "Successfully killed $service_type in $service, PID: $pid."
-                else
-                    echo_error "Failed to kill $service_type in $service, PID: $pid."
-                fi
-            else
-                echo_info "$service_type in $service has been stopped gracefully."
-            fi
-        else
-            echo_warn "Directory $service_dir does not exist, skipping."
-        fi
-    done
+    echo_info "[√] Directory structure initialized under '$pulsar_cluster_name'."
 }
 
-shutdownPulsarServices() {
+shutdownPulsarServicesOld() {
     local services=("broker1" "broker2" "bookie1" "bookie2" "bookie3" "zk")
     local service_dir=""
     local service_type=""
@@ -283,6 +258,52 @@ shutdownPulsarServices() {
     done
 }
 
+shutdownPulsarServices() {
+    local services=("broker1" "broker2" "bookie1" "bookie2" "bookie3" "zk")
+    local service_dir=""
+    local service_type=""
+    local pid=""
+    local shutdown_output=""
+    local result=""
+
+    for service in "${services[@]}"; do
+        service_dir="$pulsar_cluster_name/$service"
+
+        # 确定服务类型
+        if [[ "$service" == *"broker"* ]]; then
+            service_type="broker"
+        elif [[ "$service" == *"bookie"* ]]; then
+            service_type="bookie"
+        elif [[ "$service" == *"zk"* || "$service" == *"Zookeeper"* ]]; then
+            service_type="zookeeper"
+        fi
+
+        # 检查 JVM 进程是否存在
+        pid=$(pgrep -f "$service_dir")
+        if [ ! -z "$pid" ]; then
+            # 使用 pulsar-daemon 停止服务，并重定向中间输出
+            shutdown_output=$("$service_dir/bin/pulsar-daemon" stop "$service_type" 2>&1)
+
+            # 检查输出中是否含有 "Shutdown completed"
+            if echo "$shutdown_output" | grep -q "Shutdown completed"; then
+                echo_info "$service_type in $service has been stopped successfully."
+            else
+                echo_warn "Shutdown failed for $service_type in $service. Attempting kill."
+                kill -9 "$pid"
+                result=$?
+                if [ $result -eq 0 ]; then
+                    echo_info "Successfully killed $service_type in $service, PID: $pid."
+                else
+                    echo_error "Failed to kill $service_type in $service, PID: $pid."
+                fi
+            fi
+        else
+            echo_info "No JVM process found for $service_type in $service. Skipping shutdown."
+        fi
+    done
+
+}
+
 
 cleanupDirectories() {
 
@@ -302,18 +323,53 @@ cleanupDirectories() {
     echo_info "Directory '$pulsar_cluster_name' and all its contents have been removed."
 }
 
-adjustJVMSettings() {
-    local pulsar_env="$1/conf/pulsar_env.sh"
-    local bkenv="$1/conf/bkenv.sh"
+adjustZKEnvSettings() {
+    local config_dir="$1"
+    local heap_size="$2"
+    local direct_mem_size="$3"
+    local pulsar_env="$config_dir/conf/pulsar_env.sh"
 
-    # 调整 Pulsar 的 JVM 设置
-    ${sed_i} 's|PULSAR_MEM=.*|PULSAR_MEM=${PULSAR_MEM:-"-Xms128m -Xmx128m -XX:MaxDirectMemorySize=256m"}|' "$pulsar_env"
+    # 调整 Pulsar 和 Zookeeper 的 JVM 设置
 
-    # 调整 Bookie 的 JVM 设置
-    ${sed_i} 's|BOOKIE_MEM=.*|BOOKIE_MEM=${BOOKIE_MEM:-${PULSAR_MEM:-"-Xms128m -Xmx128m -XX:MaxDirectMemorySize=128m"}}|' "$bkenv"
-
-    echo "JVM settings adjusted for $1"
+    if [[ -f "$pulsar_env" ]]; then
+        ${sed_i} "s|PULSAR_MEM=.*|PULSAR_MEM=${PULSAR_MEM:-\"-Xms${heap_size} -Xmx${heap_size} -XX:MaxDirectMemorySize=${direct_mem_size}\"}|" "$pulsar_env"
+        echo_info "[√] Zookeeper JVM settings adjusted with Heap: $heap_size, Direct Memory: $direct_mem_size"
+    else
+        echo_error "Zookeeper environment settings file not found in $pulsar_env"
+    fi
 }
+
+adjustPulsarEnvSettings() {
+    local config_dir="$1"
+    local heap_size="$2"
+    local direct_mem_size="$3"
+    local pulsar_env="$config_dir/conf/pulsar_env.sh"
+
+    # 调整 Pulsar 和 Zookeeper 的 JVM 设置
+
+    if [[ -f "$pulsar_env" ]]; then
+        ${sed_i} "s|PULSAR_MEM=.*|PULSAR_MEM=${PULSAR_MEM:-\"-Xms${heap_size} -Xmx${heap_size} -XX:MaxDirectMemorySize=${direct_mem_size}\"}|" "$pulsar_env"
+        echo_info "[√] Pulsar JVM settings adjusted with Heap: $heap_size, Direct Memory: $direct_mem_size"
+    else
+        echo_error "Pulsar environment settings file not found in $pulsar_env"
+    fi
+}
+
+adjustBookieEnvSettings() {
+    local config_dir="$1"
+    local heap_size="$2"
+    local direct_mem_size="$3"
+    local bkenv="$config_dir/conf/bkenv.sh"
+
+    # 只调整 Bookie 的 JVM 设置
+    if [[ -f "$bkenv" ]]; then
+        ${sed_i} "s|BOOKIE_MEM=.*|BOOKIE_MEM=${BOOKIE_MEM:-\"-Xms${heap_size} -Xmx${heap_size} -XX:MaxDirectMemorySize=${direct_mem_size}\"}|" "$bkenv"
+        echo_info "[√] Bookie JVM settings adjusted with Heap: $heap_size, Direct Memory: $direct_mem_size"
+    else
+        echo_error "Bookie environment settings file not found in $bkenv"
+    fi
+}
+
 
 initializePulsarEnvironment() {
 
@@ -358,14 +414,63 @@ initializePulsarEnvironment() {
         echo_warn "Warning: log4j2.yaml not found. Skipping modification."
     fi
 
-    adjustJVMSettings "$pulsar_dir"
+    adjustPulsarEnvSettings "$pulsar_dir" "128m" "256m" 
+    adjustBookieEnvSettings "$pulsar_dir" "64m" "64m" 
 
     # 创建其他子目录
     for subdir in broker1 broker2 bookie1 bookie2 bookie3 zk client; do
         dest_dir="$pulsar_cluster_name/$subdir"
         mkdir -p "$dest_dir"
-        cp -r "$pulsar_dir/bin" "$pulsar_dir/conf" "$dest_dir"
+        mkdir -p "$dest_dir/conf"
+        # 根据不同的服务类型复制不同的配置文件
+        case $subdir in
+            broker*)
+                cp "$pulsar_dir/conf/broker.conf" "$dest_dir/conf/"
+                cp "$pulsar_dir/conf/pulsar_env.sh" "$dest_dir/conf/"
+                cp "$pulsar_dir/conf/default_rocksdb.conf" "$dest_dir/conf/"
+                cp "$pulsar_dir/conf/entry_location_rocksdb.conf" "$dest_dir/conf/"
+                cp "$pulsar_dir/conf/filesystem_offload_core_site.xml" "$dest_dir/conf/"
+                cp -r "$pulsar_dir/conf/functions-logging" "$dest_dir/conf/"
+                cp "$pulsar_dir/conf/functions_log4j2.xml" "$dest_dir/conf/"
+                cp "$pulsar_dir/conf/functions_worker.yml" "$dest_dir/conf/"
+                cp "$pulsar_dir/conf/global_zookeeper.conf" "$dest_dir/conf/"
+                cp "$pulsar_dir/conf/ledger_metadata_rocksdb.conf" "$dest_dir/conf/"
+                cp -r "$pulsar_dir/conf/log4j2-scripts" "$dest_dir/conf/"
+                cp "$pulsar_dir/conf/log4j2.yaml" "$dest_dir/conf/"
+                cp "$pulsar_dir/conf/proxy.conf" "$dest_dir/conf/"
+                cp "$pulsar_dir/conf/pulsar_env.sh" "$dest_dir/conf/"
+                cp "$pulsar_dir/conf/schema_example.json" "$dest_dir/conf/"
+                cp "$pulsar_dir/conf/standalone.conf" "$dest_dir/conf/"
+                cp "$pulsar_dir/conf/websocket.conf" "$dest_dir/conf/"
+                ;;
+            bookie*)
+                cp "$pulsar_dir/conf/bookkeeper.conf" "$dest_dir/conf/"
+                cp "$pulsar_dir/conf/bkenv.sh" "$dest_dir/conf/"
+                cp "$pulsar_dir/conf/default_rocksdb.conf" "$dest_dir/conf/"
+                cp "$pulsar_dir/conf/entry_location_rocksdb.conf" "$dest_dir/conf/"
+                cp "$pulsar_dir/conf/global_zookeeper.conf" "$dest_dir/conf/"
+                cp "$pulsar_dir/conf/ledger_metadata_rocksdb.conf" "$dest_dir/conf/"
+                cp "$pulsar_dir/conf/log4j2.yaml" "$dest_dir/conf/"
+                ;;
+            zk)
+                cp "$pulsar_dir/conf/zookeeper.conf" "$dest_dir/conf/"
+                cp "$pulsar_dir/conf/pulsar_env.sh" "$dest_dir/conf/"
+                cp "$pulsar_dir/conf/log4j2.yaml" "$dest_dir/conf/"
+                
+                ;;
+            client)
+                cp "$pulsar_dir/conf/client.conf" "$dest_dir/conf/"
+                cp "$pulsar_dir/conf/pulsar_env.sh" "$dest_dir/conf/"
+                cp "$pulsar_dir/conf/log4j2.yaml" "$dest_dir/conf/"
+                cp "$pulsar_dir/conf/pulsar_tools_env.sh" "$dest_dir/conf/"
+                ;;
+        esac
+
+        # 复制bin目录
+        cp -r "$pulsar_dir/bin" "$dest_dir"
     done
+
+    adjustZKEnvSettings "$pulsar_cluster_name/zk" "64m" "64m" 
 
     # 设置 lib 目录的软链接
     for subdir in broker1 broker2 bookie1 bookie2 bookie3 zk client; do
@@ -382,7 +487,7 @@ initializePulsarEnvironment() {
         done
     done
 
-    echo_info "[√]Pulsar environment has been initialized successfully under '$pulsar_cluster_name'."
+    echo_info "[√] Pulsar directories has been initialized successfully under path of '$pulsar_cluster_name'."
 }
 
 modifyZookeeperConfig() {
@@ -399,7 +504,7 @@ modifyZookeeperConfig() {
     eval $sed_i "s/admin\.serverPort=[0-9]*/admin.serverPort=$zk_admin_serverPort/" "$zk_conf_file"
     eval $sed_i "s/metricsProvider\.httpPort=[0-9]*/metricsProvider.httpPort=$zk_metricsProvider_httpPort/" "$zk_conf_file"
 
-    echo_info "[√]Zookeeper configuration updated successfully."
+    # echo_info "[√] Zookeeper configuration updated successfully."
 }
 
 startSingleZookeeperNode() {
@@ -410,8 +515,8 @@ startSingleZookeeperNode() {
     
     # 启动 Zookeeper
     if [ -d "$zk_dir" ] && [ -x "$zk_dir/bin/pulsar-daemon" ]; then
-        "$zk_dir/bin/pulsar-daemon" start zookeeper
-        echo_info "Zookeeper started with stats server port: $zk_stats_server_port"
+        "$zk_dir/bin/pulsar-daemon" start zookeeper > /dev/null 2>&1
+        echo_info "[√] Zookeeper started with server port: $zk_server_port"
     else
         echo_error "Error: Invalid Zookeeper directory or executable not found at '$zk_dir/bin/pulsar-daemon'"
         return 1
@@ -422,22 +527,17 @@ startSingleZookeeperNode() {
 # 检测 Zookeeper 服务的函数
 checkZookeeper() {
     local zk_dir="$pulsar_cluster_name/zk"
-    echo_info "Checking Zookeeper service on ${ZK_SERVER}..."
 
     # 尝试创建一个临时节点
     create_output=$($zk_dir/bin/pulsar zookeeper-shell -server $ZK_SERVER create /testzk "data" 2>&1)
-    if [[ $create_output == *"Created"* ]]; then
-        echo_info "Create operation successful."
-    else
+    if [[ ! $create_output == *"Created"* ]]; then
         echo_error "Create operation failed."
         return 1
     fi
 
     # 尝试读取刚才创建的节点
     get_output=$($zk_dir/bin/pulsar zookeeper-shell -server $ZK_SERVER get /testzk 2>&1)
-    if [[ $get_output == *"data"* ]]; then
-        echo_info "Get operation successful."
-    else
+    if [[ ! $get_output == *"data"* ]]; then
         echo_error "Get operation failed."
         return 1
     fi
@@ -445,7 +545,7 @@ checkZookeeper() {
     # 尝试删除临时节点
     delete_output=$($zk_dir/bin/pulsar zookeeper-shell -server $ZK_SERVER delete /testzk 2>&1)
 
-    echo_info "[√]Zookeeper service is working correctly."
+    echo_info "[√] Zookeeper service on ${ZK_SERVER} is working correctly."
     return 0
 }
 
@@ -465,7 +565,7 @@ initialize_metadata() {
     # 检查输出中是否包含成功的关键字
     echo "$init_output" | grep -q "Cluster metadata for '$pulsar_cluster_name' setup correctly"
     if [ $? -eq 0 ]; then
-        echo_info "[√]Metadata initialization succeeded: Cluster metadata for '$pulsar_cluster_name' setup correctly."
+        echo_info "[√] Pulsar Metadata initialization succeeded: Cluster metadata for '$pulsar_cluster_name' setup correctly."
     else
         echo_error "Metadata initialization failed or the success message was not found in the output."
     fi
@@ -483,7 +583,7 @@ check_metadata_initialization() {
         echo_error "Metadata initialization failed: Node $node_path does not exist in ZooKeeper."
         return 1
     else
-        echo_info "[√]Metadata initialization succeeded: Node $node_path exists in ZooKeeper."
+        echo_info "[√] Pulsar Metadata initialization succeeded in znode: $node_path."
         return 0
     fi
 }
@@ -536,26 +636,26 @@ startAllBookies() {
         local bookie_dir="$pulsar_cluster_name/$bookie_dir_base$i"
         local daemon_script="$bookie_dir/bin/pulsar-daemon"
 
-        echo "Starting Bookie $i from directory $bookie_dir..."
-        $daemon_script start bookie
+        # echo "Starting Bookie $i from directory $bookie_dir..."
+        $daemon_script start bookie > /dev/null 2>&1
 
     done
 
-    echo_info "All Bookies have been started."
+    echo_info "[√] All Bookies have been started."
 }
 
 testBookies() {
     local bookie_dir_base="bookie1"  # 指定第一个Bookie
     local bookie_test_script="$pulsar_cluster_name/$bookie_dir_base/bin/bookkeeper"  # 构建测试脚本路径
 
-    echo_info "Testing Bookie at $bookie_test_script..."
+    # echo_info "Testing Bookie at $bookie_test_script..."
 
     # 执行测试
     $bookie_test_script shell simpletest --ensemble 2 --writeQuorum 2 --ackQuorum 2 --numEntries 10 > ./10_entries_written.log 2>&1 
 
     # 检查测试结果
     if [[ -f ./10_entries_written.log && $(grep -c "10 entries written" ./10_entries_written.log) -ne 0 ]]; then
-        echo_info "[√] Your bookies is all ready."
+        echo_info "[√] All your Bookie nodes has successfully passed the test."
         rm ./10_entries_written.log
     else
         echo_error "[x] Bookies simpletest failed. Please check it manually."
@@ -592,7 +692,7 @@ modifyBrokerConfig() {
         ${sed_i} "s|allowAutoTopicCreationType=.*|allowAutoTopicCreationType=partitioned|" "$broker_conf"
         ${sed_i} "s|brokerDeleteInactiveTopicsEnabled=.*|brokerDeleteInactiveTopicsEnabled=false|" "$broker_conf"
 
-        echo_info "Broker configuration for broker $i updated."
+        # echo_info "Broker configuration for broker $i updated."
     done
 }
 
@@ -605,12 +705,12 @@ startAllBrokers() {
         local bookie_dir="$pulsar_cluster_name/$bookie_dir_base$i"
         local daemon_script="$bookie_dir/bin/pulsar-daemon"
 
-        echo "Starting Bookie $i from directory $bookie_dir..."
-        $daemon_script start broker
+        # echo "Starting Brokers $i from directory $bookie_dir..."
+        $daemon_script start broker > /dev/null 2>&1
 
     done
 
-    echo_info "All Bookies have been started."
+    echo_info "[√] All Brokers have been started."
 }
 
 modifyClientConfig() {
@@ -626,7 +726,7 @@ modifyClientConfig() {
     # 更新brokerServiceUrl
     ${sed_i} "s|brokerServiceUrl=.*|brokerServiceUrl=$broker_service_urls|" "$client_conf_file"
 
-    echo_info "Client configuration updated in $client_conf_file"
+    #echo_info "Client configuration updated in $client_conf_file"
 }
 
 testPulsarService() {
@@ -634,8 +734,6 @@ testPulsarService() {
     local pulsar_admin="$client_dir/bin/pulsar-admin"
     local pulsar_client="$client_dir/bin/pulsar-client"
 
-    # 创建集群
-    $pulsar_admin clusters create $pulsar_cluster_name
     # 创建租户
     $pulsar_admin tenants create t1 -c $pulsar_cluster_name
 
@@ -650,13 +748,27 @@ testPulsarService() {
 
     # 检查消息是否成功发送
     if [[ -f ./produce.log && $(grep -c "10 messages successfully produced" ./produce.log) -ne 0 ]]; then
-        echo_info "[pulsar-client produce][√] 10 messages successfully produced"
+        echo_info "[√] 10 messages successfully produced"
+        echo_info "[√] Your Pulsar cluster is ready, enjoy!"
         rm ./produce.log
     else
-        echo_error "[pulsar-client produce][x] Something wrong when using pulsar-client produce message."
+        echo_error "[x] Something wrong when using pulsar-client produce message."
         exit 1
     fi
 }
+
+printClusterConnectionInfo() {
+    
+    local web_service_urls="http://127.0.0.1:$br_1_web_service_url,127.0.0.1:$br_2_web_service_url"
+    local broker_service_urls="pulsar://127.0.0.1:$br_1_broker_service_url,127.0.0.1:$br_2_broker_service_url"
+
+    echo_info "Pulsar Cluster Name: $pulsar_cluster_name"
+    echo_info "Pulsar Web Service URLs(Admin RESTFul Port, default 8080): $web_service_urls"
+    echo_info "Pulsar Broker Service URLs(Data Port, default 6650): $broker_service_urls"
+}
+
+echo_info "====> Start to (re)deploy the pseudo-cluster of pulsar <===="
+
 
 checkOS
 
@@ -687,4 +799,6 @@ startAllBrokers
 
 modifyClientConfig
 testPulsarService
+
+printClusterConnectionInfo
 printHello
