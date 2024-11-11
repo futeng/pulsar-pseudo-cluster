@@ -46,74 +46,45 @@ Tips: It's recommend to stop all threads ( `./stop-all.sh` ) before you redeploy
  ## Full log example
 
 ```shell
-[2022-03-24 11:34:27] ====> Start to (re)deploy the pseudo-cluster of pulsar <====
-[2022-03-24 11:34:27] [1/9][√] Your OS is ready => Mac OS
-[2022-03-24 11:34:27] [2/9][√] Your JDK is ready => 1.8.0_311. Please check the version conflicts with Pulsar manually(JDK11+ is recommend).
-[2022-03-24 11:34:27] [3/9][√] Your Pulsar tarball is ready => apache-pulsar-2.8.2-bin.tar.gz
-[2022-03-24 11:34:27] [4/9][√] Your Ports are ready => Port list: 12181|22181|32181|19990|29990|39990|18001|18002|18003|18004|18005|18006|12888|13888|22888|23888|32888|33888|18443|28443|38443|16650|26650|36650|13181|23181|33181|18080|28080|38080|16651|26651|36651
-[2022-03-24 11:34:27] [5/9][√] Please check the disk's remaining capacity manually. It's should remaining more than 95%.
-doing start zookeeper ...
-starting zookeeper, logging to /Users/futeng/workspaces/tmp/tmp/pulsar-pseudo-cluster/pulsar-1/logs/pulsar-zookeeper-futengdeMac-mini.local.log
-Note: Set immediateFlush to true in conf/log4j2.yaml will guarantee the logging event is flushing to disk immediately. The default behavior is switched off due to performance considerations.
-doing start zookeeper ...
-starting zookeeper, logging to /Users/futeng/workspaces/tmp/tmp/pulsar-pseudo-cluster/pulsar-2/logs/pulsar-zookeeper-futengdeMac-mini.local.log
-Note: Set immediateFlush to true in conf/log4j2.yaml will guarantee the logging event is flushing to disk immediately. The default behavior is switched off due to performance considerations.
-doing start zookeeper ...
-starting zookeeper, logging to /Users/futeng/workspaces/tmp/tmp/pulsar-pseudo-cluster/pulsar-3/logs/pulsar-zookeeper-futengdeMac-mini.local.log
-Note: Set immediateFlush to true in conf/log4j2.yaml will guarantee the logging event is flushing to disk immediately. The default behavior is switched off due to performance considerations.
-[2022-03-24 11:34:27] [6/9][√] Your Zookeeper pseudo-cluster is all ready.
-[2022-03-24 11:34:27] [7/9][√] Your cluster metadata initialized in Zookeeper is ready.
-[2022-03-24 11:34:27] [8/9][√] Your cluster metadata test is ready. => {"serviceUrl":"http://127.0.0.1:12181:18080","serviceUrlTls":"https://127.0.0.1:12181:18443","brokerServiceUrl":"pulsar://127.0.0.1:12181:16650","brokerServiceUrlTls":"pulsar+ssl://127.0.0.1:12181:16651","brokerClientTlsEnabled":false,"tlsAllowInsecureConnection":false,"brokerClientTlsEnabledWithKeyStore":false,"brokerClientTlsTrustStoreType":"JKS"}
-doing start bookie ...
-starting bookie, logging to /Users/futeng/workspaces/tmp/tmp/pulsar-pseudo-cluster/pulsar-1/logs/pulsar-bookie-futengdeMac-mini.local.log
-Note: Set immediateFlush to true in conf/log4j2.yaml will guarantee the logging event is flushing to disk immediately. The default behavior is switched off due to performance considerations.
-doing start bookie ...
-starting bookie, logging to /Users/futeng/workspaces/tmp/tmp/pulsar-pseudo-cluster/pulsar-2/logs/pulsar-bookie-futengdeMac-mini.local.log
-Note: Set immediateFlush to true in conf/log4j2.yaml will guarantee the logging event is flushing to disk immediately. The default behavior is switched off due to performance considerations.
-doing start bookie ...
-starting bookie, logging to /Users/futeng/workspaces/tmp/tmp/pulsar-pseudo-cluster/pulsar-3/logs/pulsar-bookie-futengdeMac-mini.local.log
-Note: Set immediateFlush to true in conf/log4j2.yaml will guarantee the logging event is flushing to disk immediately. The default behavior is switched off due to performance considerations.
-[2022-03-24 11:34:27] [9/9][√] Your bookies is all ready.
-doing start broker ...
-starting broker, logging to /Users/futeng/workspaces/tmp/tmp/pulsar-pseudo-cluster/pulsar-1/logs/pulsar-broker-futengdeMac-mini.local.log
-Note: Set immediateFlush to true in conf/log4j2.yaml will guarantee the logging event is flushing to disk immediately. The default behavior is switched off due to performance considerations.
-doing start broker ...
-starting broker, logging to /Users/futeng/workspaces/tmp/tmp/pulsar-pseudo-cluster/pulsar-2/logs/pulsar-broker-futengdeMac-mini.local.log
-Note: Set immediateFlush to true in conf/log4j2.yaml will guarantee the logging event is flushing to disk immediately. The default behavior is switched off due to performance considerations.
-doing start broker ...
-starting broker, logging to /Users/futeng/workspaces/tmp/tmp/pulsar-pseudo-cluster/pulsar-3/logs/pulsar-broker-futengdeMac-mini.local.log
-Note: Set immediateFlush to true in conf/log4j2.yaml will guarantee the logging event is flushing to disk immediately. The default behavior is switched off due to performance considerations.
-[2022-03-24 11:34:27] [ list brokers ] -> pulsar-1/bin/pulsar-admin brokers list pulsar_pseudo_cluster
-"127.0.0.1:28080"
-"127.0.0.1:18080"
-[2022-03-24 11:34:27] [ leader-broker ] -> pulsar-1/bin/pulsar-admin brokers leader-broker
-{
-  "serviceUrl" : "http://127.0.0.1:18080"
-}
-[2022-03-24 11:34:27] [ create local cluster ] -> pulsar-1/bin/pulsar-admin clusters create pulsar_pseudo_cluster
-[2022-03-24 11:34:27] [ create tenant ] -> pulsar-1/bin/pulsar-admin tenants create t1 -c pulsar_pseudo_cluster
-[2022-03-24 11:34:27] [ create tenant/namespaces ] -> pulsar-1/bin/pulsar-admin namespaces create t1/ns1 -c pulsar_pseudo_cluster
-[2022-03-24 11:34:27] [ create second cluster ] -> pulsar-1/bin/pulsar-admin clusters create cluster_2
-[2022-03-24 11:34:27] [ create second tenant ] -> pulsar-1/bin/pulsar-admin tenants create t2 -c cluster_2
-[2022-03-24 11:34:27] [ create second tenant/namespaces ] -> pulsar-1/bin/pulsar-admin namespaces create t2/ns2 -c cluster_2
-[2022-03-24 11:34:27] [ list tenants ] -> pulsar-1/bin/pulsar-admin tenants list
-"t1"
-"t2"
-[2022-03-24 11:34:27] [ list tenant's namespaces ] -> pulsar-1/bin/pulsar-admin namespaces list t1
-"t1/ns1"
-[2022-03-24 11:34:27] [ get tenant's clusters ] -> pulsar-1/bin/pulsar-admin namespaces get-clusters t1/ns1
-"pulsar_pseudo_cluster"
-[2022-03-24 11:34:27] [pulsar-client produce][√] 10 messages successfully produced
-[2022-03-24 11:34:27] [pulsar-client consume] Now it's your turn to test. Please execute consume command like:
-pulsar-1/bin/pulsar-client consume persistent://t1/ns1/test -n 10 -s "consumer-test"  -t "Exclusive" -p "Earliest"
- _   _  _     ______        _                    _
+[2024-11-11 13:03:03][info] ====> Start to (re)deploy the pseudo-cluster of pulsar <====
+[2024-11-11 13:03:03][info] [√] Your operating system is supported => macOS
+[2024-11-11 13:03:03][info] broker in broker1 has been stopped successfully.
+[2024-11-11 13:03:03][info] broker in broker2 has been stopped successfully.
+[2024-11-11 13:03:03][info] bookie in bookie1 has been stopped successfully.
+[2024-11-11 13:03:03][info] bookie in bookie2 has been stopped successfully.
+[2024-11-11 13:03:03][info] bookie in bookie3 has been stopped successfully.
+[2024-11-11 13:03:03][info] zookeeper in zk has been stopped successfully.
+[2024-11-11 13:03:03][info] Directory 'pulsar_cluster_1' and all its contents have been removed.
+[2024-11-11 13:03:03][info] [√] JAVA_HOME is found in /Users/futeng/.sdkman/candidates/java/current
+[2024-11-11 13:03:03][info] [√] Detected Java version: 17.0.13 is 17 or greater.
+[2024-11-11 13:03:03][info] [√] No port conflicts detected.
+[2024-11-11 13:03:03][info] [√] The disk /dev/disk3s1 has sufficient space (70.35 GB available).
+[2024-11-11 13:03:03][info] [√] Apache Pulsar binary package is found in the current directory.
+[2024-11-11 13:03:03][info] [√] Directory structure initialized under 'pulsar_cluster_1'.
+[2024-11-11 13:03:03][info] [√] Pulsar JVM settings adjusted with Heap: 128m, Direct Memory: 256m
+[2024-11-11 13:03:03][info] [√] Bookie JVM settings adjusted with Heap: 64m, Direct Memory: 64m
+[2024-11-11 13:03:03][info] [√] Zookeeper JVM settings adjusted with Heap: 64m, Direct Memory: 64m
+[2024-11-11 13:03:03][info] [√] Pulsar directories has been initialized successfully under path of 'pulsar_cluster_1'.
+[2024-11-11 13:03:03][info] [√] Zookeeper started with server port: 12181
+[2024-11-11 13:03:03][info] [√] Zookeeper service on 127.0.0.1:12181 is working correctly.
+[2024-11-11 13:03:03][info] [√] Pulsar Metadata initialization succeeded: Cluster metadata for 'pulsar_cluster_1' setup correctly.
+[2024-11-11 13:03:03][info] [√] Pulsar Metadata initialization succeeded in znode: /pulsar_cluster_1.
+[2024-11-11 13:03:03][info] [√] All Bookies have been started.
+[2024-11-11 13:03:03][info] [√] All your Bookie nodes has successfully passed the test.
+[2024-11-11 13:03:03][info] [√] All Brokers have been started.
+[2024-11-11 13:03:03][info] [√] 10 messages successfully produced
+[2024-11-11 13:03:03][info] [√] Your Pulsar cluster is ready, enjoy!
+[2024-11-11 13:03:03][info] Pulsar Cluster Name: pulsar_cluster_1
+[2024-11-11 13:03:03][info] Pulsar Web Service URLs(Admin RESTFul Port, default 8080): http://127.0.0.1:18080,127.0.0.1:18081
+[2024-11-11 13:03:03][info] Pulsar Broker Service URLs(Data Port, default 6650): pulsar://127.0.0.1:16650,127.0.0.1:16652
+ _   _  _     ______        _                    _ 
 | | | |(_)    | ___ \      | |                  | |
 | |_| | _     | |_/ /_   _ | | ___   __ _  _ __ | |
 |  _  || |    |  __/| | | || |/ __| / _` || '__|| |
 | | | || | _  | |   | |_| || |\__ \| (_| || |   |_|
 \_| |_/|_|( ) \_|    \__,_||_||___/ \__,_||_|   (_)
-          |/
-
+          |/                                       
+                                         
 ```
 
 
