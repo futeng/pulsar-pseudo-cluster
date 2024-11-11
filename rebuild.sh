@@ -684,9 +684,12 @@ modifyBrokerConfig() {
         ${sed_i} "s|metadataStoreUrl=.*|metadataStoreUrl=$ZK_SERVER/$pulsar_cluster_name|" "$broker_conf"
         ${sed_i} "s|configurationMetadataStoreUrl=.*|configurationMetadataStoreUrl=$ZK_SERVER/$pulsar_cluster_name|" "$broker_conf"
         ${sed_i} "s|webServicePort=.*|webServicePort=$web_service_url|" "$broker_conf"
-        ${sed_i} "s|webServicePortTls=.*|webServicePortTls=$web_service_url_tls|" "$broker_conf"
         ${sed_i} "s|brokerServicePort=.*|brokerServicePort=$broker_service_url|" "$broker_conf"
-        ${sed_i} "s|brokerServicePortTls=.*|brokerServicePortTls=$broker_service_url_tls|" "$broker_conf"
+
+        # 4.0.x 版本如果填写了 TLS 相关端口，会自动认为需要 TLS 相关内容，这里 Pulsar 判定有问题，暂且这块不需要都注释掉
+        # ${sed_i} "s|webServicePortTls=.*|webServicePortTls=$web_service_url_tls|" "$broker_conf"
+        # ${sed_i} "s|brokerServicePortTls=.*|brokerServicePortTls=$broker_service_url_tls|" "$broker_conf"
+        
         ${sed_i} "s|clusterName=.*|clusterName=$pulsar_cluster_name|" "$broker_conf"
         ${sed_i} "s|advertisedAddress=.*|advertisedAddress=127.0.0.1|" "$broker_conf"
         ${sed_i} "s|allowAutoTopicCreationType=.*|allowAutoTopicCreationType=partitioned|" "$broker_conf"
