@@ -95,3 +95,6 @@ Please feel free to contact me:
 
 - ifuteng@gmail.com / ifuteng@qq.com
 - WeChart: ifuteng
+
+- [x] Change logs dir
+- [ ] 
