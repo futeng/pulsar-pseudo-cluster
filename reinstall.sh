@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 # Script to deploy pulsar in pseudo-cluster.
 # More info https://github.com/futeng/pulsar-pseudo-cluster
-# Copyright (C) 2022 fu teng (Please feel free to contact me : ifuteng@gmail.com)
+# Copyright (C) 2024 fu teng (Please feel free to contact me : ifuteng@gmail.com)
 # Permission to copy and modify is granted under the Apache 2.0 license
-# Last revised 23/3/2022
+# Last revised 2024-11-14
 
 printHello() {
 
