@@ -17,14 +17,14 @@ echo "          |/                                       ";
 echo "                                                   ";
 }
 
+# 记录开始时间
+start_time=$(date +%s)  
 
-start_time=$(date +%s)  # 记录开始时间
+#### 自定义变量区域 Start ####
+# 也可在  Notebook 中调整
 
-
-
-# 变量，用户可在 cell 中自定义调整
+# 集群名称
 pulsar_cluster_name=pulsar_cluster_1
-zk_dir="$pulsar_cluster_name/zk"
 
 # 端口
 zk_server_port=12181
@@ -49,9 +49,17 @@ bk_2_prometheusStatsHttpPort=18005
 bk_3_bookiePort=13183
 bk_3_prometheusStatsHttpPort=18006
 
+#### 自定义变量区域 END ####
 
+# 组织目录
+SCRIPT_DIR=$(dirname "$0")
+CLUSTER_HOME=$(cd -P $SCRIPT_DIR/$SCRIPT_DIR;pwd)
+
+# 集中日志
+export PULSAR_LOG_DIR="$CLUSTER_HOME/$pulsar_cluster_name/logs"
 
 # Zookeeper 服务地址
+zk_dir="$pulsar_cluster_name/zk"
 ZK_SERVER="127.0.0.1:$zk_server_port"
 
 # 将端口聚合到一个数组中
@@ -76,8 +84,6 @@ declare -a ports=(
     $bk_3_prometheusStatsHttpPort
 )
 
-
-
 # 系统命令 
 sed_i='sed -i'
 datename=$(date +"%Y-%m-%d %H:%M:%S")
@@ -85,13 +91,8 @@ alias echo_info="echo [$datename][info]"
 alias echo_error="echo [$datename][error]"
 alias echo_warn="echo [$datename][warn]"
 
-# 检查用户配置文件是否存在
-if [ -f "user-config.conf" ]; then
-    # 读取用户配置
-    source user-config.conf
-fi
 
-
+# 打印耗时
 printTimes() {
     local end_time=$(date +%s)  # 记录结束时间
     local elapsed_time=$(( end_time - start_time ))  # 计算耗时
@@ -152,8 +153,6 @@ checkJDK() {
     fi
 }
 
-
-
 checkPortConflicts() {
 
     # 检查每个端口
@@ -212,52 +211,6 @@ initializeDirectories() {
     echo_info "[√] Directory structure initialized under '$pulsar_cluster_name'."
 }
 
-shutdownPulsarServicesOld() {
-    local services=("broker1" "broker2" "bookie1" "bookie2" "bookie3" "zk")
-    local service_dir=""
-    local service_type=""
-    local pid=""
-
-    for service in "${services[@]}"; do
-        service_dir="$pulsar_cluster_name/$service"
-
-        # 确定服务类型
-        if [[ "$service" == *"broker"* ]]; then
-            service_type="broker"
-        elif [[ "$service" == *"bookie"* ]]; then
-            service_type="bookie"
-        elif [[ "$service" == *"zk"* || "$service" == *"Zookeeper"* ]]; then
-            service_type="zookeeper"
-        fi
-
-        # 检查 JVM 进程是否存在
-        pid=$(pgrep -f "$service_dir")
-        if [ ! -z "$pid" ]; then
-            # 使用 pulsar-daemon 停止服务
-            echo_info "Stopping $service_type service in $service using pulsar-daemon."
-            "$service_dir/bin/pulsar-daemon" stop "$service_type"
-
-            # 给予一些时间让进程优雅退出
-            sleep 5
-            # 再次检查进程是否还在
-            pid=$(pgrep -f "$service_dir" | grep java)
-            if [ ! -z "$pid" ]; then
-                echo_warn "Service $service_type in $service is still running, PID: $pid, attempting kill."
-                kill -9 "$pid"
-                if [ $? -eq 0 ]; then
-                    echo_info "Successfully killed $service_type in $service, PID: $pid."
-                else
-                    echo_error "Failed to kill $service_type in $service, PID: $pid."
-                fi
-            else
-                echo_info "$service_type in $service has been stopped gracefully."
-            fi
-        else
-            echo_info "No JVM process found for $service_type in $service. Skipping shutdown."
-        fi
-    done
-}
-
 shutdownPulsarServices() {
     local services=("broker1" "broker2" "bookie1" "bookie2" "bookie3" "zk")
     local service_dir=""
@@ -303,7 +256,6 @@ shutdownPulsarServices() {
     done
 
 }
-
 
 cleanupDirectories() {
 
@@ -370,7 +322,6 @@ adjustBookieEnvSettings() {
     fi
 }
 
-
 initializePulsarEnvironment() {
 
     # 查找 Pulsar 二进制包
@@ -394,29 +345,14 @@ initializePulsarEnvironment() {
         exit 1
     fi
 
-    # 检查和修改 log4j2.yaml
-    log4j2_config_path="$pulsar_dir/conf/log4j2.yaml"
-    if [ -f "$log4j2_config_path" ]; then
-        if command -v yq &>/dev/null; then
-            # 检查是否存在需要修改的条目，如果不存在，添加相应的条目
-            property_exists=$(yq eval '.Configuration.Properties.Property[] | select(.name == "pulsar.log.immediateFlush")' "$log4j2_config_path")
-            if [ -z "$property_exists" ]; then
-                # 如果属性不存在，添加新属性
-                yq e '.Configuration.Properties.Property += [{"name": "pulsar.log.immediateFlush", "value": "true"}]' -i "$log4j2_config_path"
-            else
-                # 如果属性存在，修改该属性的值
-                yq e '(.Configuration.Properties.Property[] | select(.name == "pulsar.log.immediateFlush").value) = "true"' -i "$log4j2_config_path"
-            fi
-        else
-            echo_warn "Warning: yq is not installed. Skipping modification of 'pulsar.log.immediateFlush'."
-        fi
-    else
-        echo_warn "Warning: log4j2.yaml not found. Skipping modification."
-    fi
-
     adjustPulsarEnvSettings "$pulsar_dir" "128m" "256m" 
-    adjustBookieEnvSettings "$pulsar_dir" "64m" "64m" 
+    adjustBookieEnvSettings "$pulsar_dir" "64m" "64m"
 
+    # 修改 bin/pulsar-daemon 文件，调整日志增加父级目录作为日志名字组成部分
+    PULSAR_DAEMON_SCRIPT="$pulsar_dir/bin/pulsar-daemon"
+    ${sed_i} "s|pulsar-\$command-\$HOSTNAME.log|pulsar-\$command-\$(basename \"\$PULSAR_HOME\")-\$HOSTNAME.log|" "$pulsar_dir/bin/pulsar-daemon"
+    ${sed_i} "s|pulsar-\$command-\$HOSTNAME.out|pulsar-\$command-\$(basename \"\$PULSAR_HOME\")-\$HOSTNAME.out|" "$pulsar_dir/bin/pulsar-daemon"
+   
     # 创建其他子目录
     for subdir in broker1 broker2 bookie1 bookie2 bookie3 zk client; do
         dest_dir="$pulsar_cluster_name/$subdir"
@@ -522,7 +458,6 @@ startSingleZookeeperNode() {
         return 1
     fi
 }
-
 
 # 检测 Zookeeper 服务的函数
 checkZookeeper() {
@@ -689,7 +624,7 @@ modifyBrokerConfig() {
         # 4.0.x 版本如果填写了 TLS 相关端口，会自动认为需要 TLS 相关内容，这里 Pulsar 判定有问题，暂且这块不需要都注释掉
         # ${sed_i} "s|webServicePortTls=.*|webServicePortTls=$web_service_url_tls|" "$broker_conf"
         # ${sed_i} "s|brokerServicePortTls=.*|brokerServicePortTls=$broker_service_url_tls|" "$broker_conf"
-        
+
         ${sed_i} "s|clusterName=.*|clusterName=$pulsar_cluster_name|" "$broker_conf"
         ${sed_i} "s|advertisedAddress=.*|advertisedAddress=127.0.0.1|" "$broker_conf"
         ${sed_i} "s|allowAutoTopicCreationType=.*|allowAutoTopicCreationType=partitioned|" "$broker_conf"
@@ -700,13 +635,13 @@ modifyBrokerConfig() {
 }
 
 startAllBrokers() {
-    local bookie_dir_base="broker"
-    local bookie_count=2  # 有三个bookie节点
+    local broker_dir_base="broker"
+    local broker_count=2  # 有2个broker节点
 
-    # 循环遍历每个bookie节点
-    for i in $(seq 1 $bookie_count); do
-        local bookie_dir="$pulsar_cluster_name/$bookie_dir_base$i"
-        local daemon_script="$bookie_dir/bin/pulsar-daemon"
+    # 循环遍历每个broker节点
+    for i in $(seq 1 $broker_count); do
+        local broker_dir="$pulsar_cluster_name/$broker_dir_base$i"
+        local daemon_script="$broker_dir/bin/pulsar-daemon"
 
         # echo "Starting Brokers $i from directory $bookie_dir..."
         $daemon_script start broker > /dev/null 2>&1
@@ -770,7 +705,7 @@ printClusterConnectionInfo() {
     echo_info "Pulsar Broker Service URLs(Data Port, default 6650): $broker_service_urls"
 }
 
-echo_info "====> Start to (re)deploy the pseudo-cluster of pulsar <===="
+echo_info "====> Start to (re)install the pseudo-cluster of pulsar <===="
 
 
 checkOS
@@ -803,5 +738,6 @@ startAllBrokers
 modifyClientConfig
 testPulsarService
 
+printTimes
 printClusterConnectionInfo
 printHello
