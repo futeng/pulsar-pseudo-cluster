@@ -9,7 +9,7 @@ pulsar_cluster_1/broker1/bin/pulsar-daemon stop broker
 pulsar_cluster_1/broker2/bin/pulsar-daemon stop broker
 
 pulsar_cluster_1/bookie1/bin/pulsar-daemon stop bookie
-pulsar_cluster_1/bookie2/bin/pulsar-daemon stop broker
-pulsar_cluster_1/bookie3/bin/pulsar-daemon stop broker
+pulsar_cluster_1/bookie2/bin/pulsar-daemon stop bookie
+pulsar_cluster_1/bookie3/bin/pulsar-daemon stop bookie
 
 pulsar_cluster_1/zk/bin/pulsar-daemon stop zookeeper
